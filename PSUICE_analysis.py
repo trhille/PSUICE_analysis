@@ -178,7 +178,7 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
     #sm = plt.cm.ScalarMappable(cmap=cmap, vim= , vmax= )
     #fig_abs.subplots_adjust(right=0.8)
     #cbar_ax = fig_abs.add_axes([])
-    #cbarg = fig_abs.colorbar(sm, cax=cbar_ax, ticks = (some bullshit tuple))
+    #cbarg = fig_abs.colorbar(sm, cax=cbar_ax, ticks = (some tuple))
     
     cbar = fig.colorbar(varMap)
     if logScale is False:
@@ -187,4 +187,70 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
         cbar.set_label(label='{} (10$^x$ {})'.format(varName, modelVarsInfo[varName]['units']), fontsize=18)
     
     plt.show()
+    
+    return fig, ax
+    
+    
+def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
+    x1 = modelOutput['x1']*1000.
+    y1 = modelOutput['y1']*1000.
+    x0 = modelOutput['x0']*1000.
+    y0 = modelOutput['y0']*1000.
+    
+    
+    # Interpolate velocities onto the same (x1, y1) grid
+    vaInterpolator = interpolate.interp2d(x1, y0, 
+                                          modelOutput['va'][timeLevel,:,:], kind='cubic')
+    uaInterpolator = interpolate.interp2d(x0, y1, 
+                                          modelOutput['ua'][timeLevel,:,:], kind='cubic')
+    #maskwaterInterpolator = interpolate.interp2d(x1, y1,
+                                                 #modelOutput['maskwater'][timeLevel,:,:], kind='linear')
+    hInterpolator = interpolate.interp2d(x1,y1,
+                                         modelOutput['h'][timeLevel,:,:], kind='cubic')
+    
+    flowlineX = np.zeros(int(max_iter),) # pre-allocate array for speed. This will be trimmed at the end, provided the loop doesn't reach max_iter
+    flowlineY = np.zeros(int(max_iter),)
+    
+    flowlineX[0] = startX * 1.
+    flowlineY[0] = startY * 1.
+     
+
+    flowlineIter=0
+    
+            
+    dtFlowline = 1.
+    
+    #dist2GL = np.zeros(np.shape(modelOutput['time'])) # distance to grounding-line from startX, startY  along streamline for each time-level
+    # loop through time-levels, calculate distance to grounding-line along a streamline
+    # treat each time-level as steady flow.
+    
+    
+    print("Performing flowline calculation for time-level {}".format(timeLevel))
+    while np.min(x1) <= flowlineX[flowlineIter] <= np.max(x1) \
+    and np.min(y1) <= flowlineY[flowlineIter] <= np.max(y1) \
+    and flowlineIter <= max_iter-2 and hInterpolator(flowlineX[flowlineIter], flowlineY[flowlineIter]) >= 1.:
+        flowlineIter += 1
+        flowlineXOld = flowlineX[flowlineIter-1] * 1.
+        flowlineYOld = flowlineY[flowlineIter-1] * 1.
+        
+        flowlineX[flowlineIter] = flowlineXOld + uaInterpolator(flowlineXOld, flowlineYOld) * dtFlowline
+        flowlineY[flowlineIter] = flowlineYOld + vaInterpolator(flowlineXOld, flowlineYOld) * dtFlowline
+        #dist2GL[timeInd] = dist2GL[timeInd] + np.sqrt((flowlineX[flowlineIter] - 
+               #flowlineXOld)**2 + (flowlineY[flowlineIter] - flowlineYOld)**2)
+
+
+    if flowlineIter >= max_iter:
+        print('Reached maximum number of iterations but did not reach end of flowline')
+        
+    print("time-level {} took {} iterations.".format(timeLevel, flowlineIter))
+
+    flowlineX = flowlineX[0:flowlineIter]
+    flowlineY = flowlineY[0:flowlineIter]
+    
+    return(flowlineX, flowlineY)
+    
+## TODO def transect()
+## TODO def timeseries()
+## TODO def flowline()
+## TODO def plot_grounding_line()
     
