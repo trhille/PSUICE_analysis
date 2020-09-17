@@ -186,7 +186,7 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
     else: 
         cbar.set_label(label='{} (10$^x$ {})'.format(varName, modelVarsInfo[varName]['units']), fontsize=18)
     
-    plt.show()
+    #plt.show()
     
     return fig, ax
     
@@ -218,7 +218,7 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
     flowlineIter=0
     
             
-    dtFlowline = 1.
+    dtFlowline = 10. #may need to change dtFlowline if you are hitting max_iter frequently. 
     
     #dist2GL = np.zeros(np.shape(modelOutput['time'])) # distance to grounding-line from startX, startY  along streamline for each time-level
     # loop through time-levels, calculate distance to grounding-line along a streamline
