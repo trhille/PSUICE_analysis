@@ -3,7 +3,7 @@ Welcome to PSUICE_analysis, a python-based analysis package for the Penn State U
 
 Questions? Contact Trevor Hillebrand (trhille@lanl.gov)
 
-###Archived PSUICE model output
+### Archived PSUICE model output
 Below is an admittedly incomplete list of archived model output from the PSU ice sheet model. Feel free to let me know what's missing!
 
 Pollard, D. (2015) "Ice Sheet Model Output, West Antarctic Ice Sheet Deglaciation" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.7265/N5NC5Z53. 
