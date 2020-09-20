@@ -254,7 +254,23 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
 def plot_groundingLine(modelOutput, ax, timeLevel=-1, color='black'):
     ax.contour(modelOutput["x1"], modelOutput["y1"], modelOutput["maskwater"][timeLevel,:,:], [0.5], colors=color)
                    
+  
+def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1, transectX=None, transectY=None, method='linear',color='black'):
+    x = modelOutput[modelVarsInfo[plotVarName]['dimensions'][2]]
+    y = modelOutput[modelVarsInfo[plotVarName]['dimensions'][1]]
    
+    plotVarInterpolator = interpolate.interp2d(x,y, modelOutput[plotVarName][timeLevel,: :], kind=method)
+    distance = np.cumsum(np.sqrt(np.gradient(transectX)**2 + np.gradient(transectY)**2))
+    plotVarInterp = transectX * np.nan
+    for ii in np.arange(0,len(transectX)-1):
+        plotVarInterp[ii] = plotVarInterpolator(transectX[ii], transectY[ii])
+  
+    if ax is not None: 
+       ax.plot(distance, plotVarInterp, c=color)
+
+    
+    return(plotVarInterp, distance)
+ 
 ## TODO def transect()
 ## TODO def timeseries()
 ## TODO def flowline()
