@@ -142,7 +142,7 @@ def plot_timeseries(modelOutput, modelVarsInfo, varNames):
         
     plt.show()
     
-def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False, modelTime=None, cmap='Blues', maskIce=False):
+def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False, modelTime=None, cmap='Blues', maskIce=False, vmin=None, vmax=None):
    
     #get x and y dimensions of variable to be plotted
     x = modelOutput[modelVarsInfo[varName]['dimensions'][2]]
@@ -167,7 +167,7 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
         
     fig, ax = plt.subplots(1,1, figsize=(10,10))
     
-    varMap = ax.pcolormesh(xGrid, yGrid, var2plot, cmap=cmap)
+    varMap = ax.pcolormesh(xGrid, yGrid, var2plot, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.axis('equal')
     ax.set_xlim(left=np.min(xGrid), right=np.max(xGrid))
     ax.set_xlabel('km', fontsize=18)
@@ -182,7 +182,7 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
     
     cbar = fig.colorbar(varMap)
     if logScale is False:
-        cbar.set_label(label='{} ({})'.format(varName, modelVarsInfo[varName]['units']), fontsize=18)
+        cbar.set_label(label='{} ({})'.format(modelVarsInfo[varName]['longName'], modelVarsInfo[varName]['units']), fontsize=18)
     else: 
         cbar.set_label(label='{} (10$^x$ {})'.format(varName, modelVarsInfo[varName]['units']), fontsize=18)
     
@@ -253,7 +253,16 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
 
 def plot_groundingLine(modelOutput, ax, timeLevel=-1, color='black'):
     ax.contour(modelOutput["x1"], modelOutput["y1"], modelOutput["maskwater"][timeLevel,:,:], [0.5], colors=color)
-                   
+    
+def plot_velocityVectors(modelOutput, modelVarsInfo, ax, varNames=['ua', 'va'], timeLevel=-1, horzStep=5, color='black'):
+    #First move both velocity vectors onto x1,y1
+    uInterp = regrid_data(varNames[0], modelOutput, modelVarsInfo, destX='x1', destY='y1')
+    vInterp = regrid_data(varNames[1], modelOutput, modelVarsInfo, destX='x1', destY='y1')
+    
+    xGrid, yGrid = np.meshgrid(modelOutput["x1"], modelOutput["y1"])
+    
+    ax.quiver(xGrid[1::horzStep, 1::horzStep], yGrid[1::horzStep, 1::horzStep], 
+              uInterp[timeLevel,1::horzStep, 1::horzStep], vInterp[timeLevel,1::horzStep, 1::horzStep])               
   
 def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1, transectX=None, transectY=None, method='linear',color='black'):
     x = modelOutput[modelVarsInfo[plotVarName]['dimensions'][2]]
@@ -271,8 +280,5 @@ def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1
     
     return(plotVarInterp, distance)
  
-## TODO def transect()
-## TODO def timeseries()
-## TODO def flowline()
-## TODO def plot_grounding_line()
-    
+## TODO def timeseriesAtPoint()
+## TODO def movie()    
