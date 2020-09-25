@@ -7,6 +7,8 @@ Questions? Contact Trevor Hillebrand (trhille@lanl.gov)
 Below is an admittedly incomplete list of archived model output from the PSU ice sheet model. Feel free to let me know what's missing!
 
 Pollard, D. (2015) "Ice Sheet Model Output, West Antarctic Ice Sheet Deglaciation" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.7265/N5NC5Z53. 
+
+Pollard, D., N. Gomez, R. M. DeConto, and H. K. Han. "Estimating Modern Elevations of Pliocene Shorelines Using a Coupled Ice Sheet‐Earth‐Sea Level Model." Journal of Geophysical Research: Earth Surface 123, no. 9 (2018): 2279-2291. doi: https://doi.org/10.18113/P8NH2J
        
 Pollard, D. (2019) "Antarctic Ice Sheet simulations for role of freshwater in future warming scenarios" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.15784/601154. 
 
