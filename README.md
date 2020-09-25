@@ -13,3 +13,7 @@ Pollard, D., N. Gomez, R. M. DeConto, and H. K. Han. "Estimating Modern Elevatio
 Pollard, D. (2019) "Antarctic Ice Sheet simulations for role of freshwater in future warming scenarios" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.15784/601154. 
 
 Tigchelaar, M., Timmermann, A., Friedrich, T., Heinemann, M., & Pollard, D. (2019). Nonlinear response of the Antarctic Ice Sheet to late Quaternary sea level and climate forcing. Cryosphere, 13(10). https://doi.org/10.22741/iccp.20180014
+
+Cornford, Stephen L., Helene Seroussi, Xylar S. Asay-Davis, G. Hilmar Gudmundsson, Rob Arthern, Chris Borstad, Julia Christmann et al. "Results of the third Marine Ice Sheet Model Intercomparison Project (MISMIP+)." The Cryosphere Discussions (2020). http://doi.org/10.5281/zenodo.3611936
+
+Sun, Sainan, Frank Pattyn, Erika G. Simon, Torsten Albrecht, Stephen Cornford, Reinhard Calov, Christophe Dumas et al. "Antarctic ice sheet response to sudden and sustained ice-shelf collapse (ABUMIP)." Journal of Glaciology (2020): 1-14. https://doi.org/10.5281/zenodo.3932934
