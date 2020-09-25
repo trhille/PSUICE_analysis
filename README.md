@@ -3,6 +3,8 @@ Welcome to PSUICE_analysis, a python-based analysis package for the Penn State U
 
 Questions? Contact Trevor Hillebrand (trhille@lanl.gov)
 
+![](surfaceSpeed_9000.0yy_BP.png)
+
 ### Archived PSUICE model output
 Below is an admittedly incomplete list of archived model output from the PSU ice sheet model. Feel free to let me know what's missing!
 
