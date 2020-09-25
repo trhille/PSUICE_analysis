@@ -11,6 +11,8 @@ Pollard, D. (2015) "Ice Sheet Model Output, West Antarctic Ice Sheet Deglaciatio
 Pollard, David, Natalya Gomez, and Robert M. Deconto. "Variations of the Antarctic ice sheet in a coupled ice sheet‐Earth‐sea level model: sensitivity to viscoelastic Earth properties." Journal of Geophysical Research: Earth Surface 122, no. 11 (2017): 2124-2138. https://doi.org/10.18113/D3SS9W
 
 Pollard, D., N. Gomez, R. M. DeConto, and H. K. Han. "Estimating Modern Elevations of Pliocene Shorelines Using a Coupled Ice Sheet‐Earth‐Sea Level Model." Journal of Geophysical Research: Earth Surface 123, no. 9 (2018): 2279-2291. doi: https://doi.org/10.18113/P8NH2J
+
+Alley, R. B., D. Pollard, B. R. Parizek, S. Anandakrishnan, M. Pourpoint, N. T. Stevens, J. A. MacGregor, K. Christianson, A. Muto, and N. Holschuh. "Possible role for tectonics in the evolving stability of the Greenland Ice Sheet." Journal of Geophysical Research: Earth Surface 124, no. 1 (2019): 97-115. https://doi.org/10.18113/D30Q11
        
 Pollard, D. (2019) "Antarctic Ice Sheet simulations for role of freshwater in future warming scenarios" U.S. Antarctic Program (USAP) Data Center. doi: https://doi.org/10.15784/601154. 
 
