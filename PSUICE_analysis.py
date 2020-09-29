@@ -280,5 +280,23 @@ def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1
     
     return(plotVarInterp, distance)
  
-## TODO def timeseriesAtPoint()
+def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, interpMethod='linear'):
+    #get x and y dimensions of variable to be interpolated
+    sourceX = modelVarsInfo[varName]['dimensions'][2]
+    sourceY = modelVarsInfo[varName]['dimensions'][1]
+    varInterp = 0.0*modelOutput["time"]
+    
+    # Loop through all timelevels and interpolate
+    for time in range(0, len(modelOutput['time'])):
+        varInterpolator = interpolate.interp2d(modelOutput[sourceX], modelOutput[sourceY], modelOutput[varName][time,:,:], kind=interpMethod)
+        varInterp[time] = varInterpolator(x, y)
+        
+    ax.plot(modelOutput["time"], varInterp)
+    ax.set_ylabel(varName + ' (' + modelVarsInfo[varName]["units"] + ')')
+    ax.set_xlabel("Time (yr)")
+    
+    return varInterp
+    
+    
+    
 ## TODO def movie()    
