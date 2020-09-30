@@ -142,7 +142,7 @@ def plot_timeseries(modelOutput, modelVarsInfo, varNames):
         
     plt.show()
     
-def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False, modelTime=None, cmap='Blues', maskIce=False, vmin=None, vmax=None):
+def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
    
     #get x and y dimensions of variable to be plotted
     x = modelOutput[modelVarsInfo[varName]['dimensions'][2]]
@@ -151,8 +151,10 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, logScale=False,
 
     # Get appropriate time level
     if modelTime is not None:
-        timeLevel = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time'])))
-    
+        timeBool = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time']))) # boolean array
+        timeLevel = [i for i, val in enumerate(timeBool) if val] # Get index of True in timeBool
+        timeLevel = timeLevel[0]
+ 
     if logScale is False:
         var2plot = modelOutput[varName][timeLevel,:,:]
     else:
