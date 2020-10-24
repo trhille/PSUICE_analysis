@@ -56,37 +56,44 @@ def regrid_velocity(modelOutput, modelVarsInfo):
     # and y0,x1 for v-component. Use regrid_data to put these on the x1,y1 grid
     
     #regrid velocity variables onto x1, y1
-    utopInterp = regrid_data('utop', modelOutput, modelVarsInfo)
-    vtopInterp = regrid_data('vtop' ,modelOutput, modelVarsInfo)
-    uaInterp = regrid_data('ua', modelOutput, modelVarsInfo)
-    vaInterp = regrid_data('va', modelOutput, modelVarsInfo)
-    ubotInterp = regrid_data('ubot', modelOutput, modelVarsInfo)
-    vbotInterp = regrid_data('vbot', modelOutput, modelVarsInfo)
-    
-    modelOutput['surfaceSpeed'] = np.sqrt(utopInterp**2 + vtopInterp**2)
-    
-    modelOutput['depthAvgSpeed'] = np.sqrt(uaInterp**2 + vaInterp**2)
-    
-    modelOutput['basalSpeed'] = np.sqrt(ubotInterp**2 + vbotInterp**2)
-    
-    # Add information about velocity fields
-    modelVarsInfo['surfaceSpeed'] = {}
-    modelVarsInfo['surfaceSpeed']['longName'] = 'Ice velocity at surface, interpolated onto x1,y1 grid'
-    modelVarsInfo['surfaceSpeed']['units'] = 'm/y'
-    modelVarsInfo['surfaceSpeed']['dimensions'] = ('time', 'y1', 'x1')
-    modelVarsInfo['surfaceSpeed']['shape'] = np.shape(modelOutput['surfaceSpeed'])
-    
-    modelVarsInfo['depthAvgSpeed'] = {}
-    modelVarsInfo['depthAvgSpeed']['longName'] = 'Depth-averaged ice velocity, interpolated onto x1,y1 grid'
-    modelVarsInfo['depthAvgSpeed']['units'] = 'm/y'
-    modelVarsInfo['depthAvgSpeed']['dimensions'] = ('time', 'y1', 'x1')
-    modelVarsInfo['depthAvgSpeed']['shape'] = np.shape(modelOutput['depthAvgSpeed'])
-    
-    modelVarsInfo['basalSpeed'] = {}
-    modelVarsInfo['basalSpeed']['longName'] = 'Ice velocity at bottom, interpolated onto x1,y1 grid'
-    modelVarsInfo['basalSpeed']['units'] = 'm/y'
-    modelVarsInfo['basalSpeed']['dimensions'] = ('time', 'y1', 'x1')
-    modelVarsInfo['basalSpeed']['shape'] = np.shape(modelOutput['basalSpeed'])
+    try:
+        utopInterp = regrid_data('utop', modelOutput, modelVarsInfo)
+        vtopInterp = regrid_data('vtop' ,modelOutput, modelVarsInfo)
+        
+        modelOutput['surfaceSpeed'] = np.sqrt(utopInterp**2 + vtopInterp**2)
+        
+        modelVarsInfo['surfaceSpeed'] = {}
+        modelVarsInfo['surfaceSpeed']['longName'] = 'Ice velocity at surface, interpolated onto x1,y1 grid'
+        modelVarsInfo['surfaceSpeed']['units'] = 'm/y'
+        modelVarsInfo['surfaceSpeed']['dimensions'] = ('time', 'y1', 'x1')
+        modelVarsInfo['surfaceSpeed']['shape'] = np.shape(modelOutput['surfaceSpeed'])
+    except:
+        print('utop and vtop not found. Skipping regrid of surface speeds')
+        
+    try:
+        uaInterp = regrid_data('ua', modelOutput, modelVarsInfo)
+        vaInterp = regrid_data('va', modelOutput, modelVarsInfo)
+        modelOutput['depthAvgSpeed'] = np.sqrt(uaInterp**2 + vaInterp**2)
+        modelVarsInfo['depthAvgSpeed'] = {}
+        modelVarsInfo['depthAvgSpeed']['longName'] = 'Depth-averaged ice velocity, interpolated onto x1,y1 grid'
+        modelVarsInfo['depthAvgSpeed']['units'] = 'm/y'
+        modelVarsInfo['depthAvgSpeed']['dimensions'] = ('time', 'y1', 'x1')
+        modelVarsInfo['depthAvgSpeed']['shape'] = np.shape(modelOutput['depthAvgSpeed'])
+    except:
+         print('ua and va not found. Skipping regrid of depth-average speeds')
+        
+    try:
+        ubotInterp = regrid_data('ubot', modelOutput, modelVarsInfo)
+        vbotInterp = regrid_data('vbot', modelOutput, modelVarsInfo)
+        modelOutput['basalSpeed'] = np.sqrt(ubotInterp**2 + vbotInterp**2)
+        
+        modelVarsInfo['basalSpeed'] = {}
+        modelVarsInfo['basalSpeed']['longName'] = 'Ice velocity at bottom, interpolated onto x1,y1 grid'
+        modelVarsInfo['basalSpeed']['units'] = 'm/y'
+        modelVarsInfo['basalSpeed']['dimensions'] = ('time', 'y1', 'x1')
+        modelVarsInfo['basalSpeed']['shape'] = np.shape(modelOutput['basalSpeed'])    
+    except:
+         print('ubot and vbot not found. Skipping regrid of bottom speeds')
         
     return modelOutput, modelVarsInfo
 
@@ -121,26 +128,34 @@ def get_variable_info(modelVarsInfo, varNames):
 
     
     
-def plot_timeseries(modelOutput, modelVarsInfo, varNames):
-
+def plot_timeseries(modelOutput, modelVarsInfo, varNames, ax=None, timeStart=None, timeEnd=None):
+    if timeStart is not None:
+        timeStart = modelTime_to_timeLevel(modelOutput, timeStart)
+    else:
+        timeEnd=-1
+        
+    if timeEnd is not None:
+        timeEnd = modelTime_to_timeLevel(modelOutput, timeEnd)
+    
     if type(varNames) is str:
         varNames = [varNames]
-    fig, ax = plt.subplots(nrows=len(varNames))
+    
+    if ax is None:
+        fig, ax = plt.subplots(nrows=len(varNames))
+        
     if len(varNames) == 1:
-        ax.plot(modelOutput['time'], modelOutput[varName])
+        ax.plot(modelOutput['time'][timeStart:timeEnd], modelOutput[varNames][timeStart:timeEnd])
         ax.set_xlabel('Time (years)')
-        ax.set_ylabel(varName)
+        ax.set_ylabel(varNames)
         
     if len(varNames) > 1:
         axCount=0
         for varName in varNames:
-            ax[axCount].plot(modelOutput['time'], modelOutput[varName])
+            ax[axCount].plot(modelOutput['time'][timeStart:timeEnd], modelOutput[varName][timeStart:timeEnd])
             ax[axCount].set_xlabel('Time (years)')
-            ax[axCount].set_ylabel('{} ({})'.format(varName, modelVarsInfo[varName]['units']))
+            ax[axCount].set_ylabel('{} ({})'.format(modelVarsInfo[varName]['longName'], modelVarsInfo[varName]['units']))
             axCount +=1
-        fig.subplots_adjust(hspace=1)
-        
-    plt.show()
+    
     
 def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
    
@@ -150,10 +165,12 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None,
     xGrid, yGrid = np.meshgrid(x, y)  
 
     # Get appropriate time level
+    
     if modelTime is not None:
-        timeBool = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time']))) # boolean array
-        timeLevel = [i for i, val in enumerate(timeBool) if val] # Get index of True in timeBool
-        timeLevel = timeLevel[0]
+        timeLevel = modelTime_to_timeLevel(modelOutput, modelTime)
+        #timeBool = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time']))) # boolean array
+        #timeLevel = [i for i, val in enumerate(timeBool) if val] # Get index of True in timeBool
+        #timeLevel = timeLevel[0]
  
     if logScale is False:
         var2plot = modelOutput[varName][timeLevel,:,:]
@@ -193,8 +210,35 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None,
     
     return fig, ax
     
+def findMinMax(modelOutput, varName, timeStart=None, timeEnd=None):
     
-def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
+    if timeStart is None:
+        timeStartInd=0    
+    else:
+        timeStartInd=np.argmin(np.abs(modelOutput['time'][:] - timeStart))
+        
+    if timeEnd is None:
+        timeEndInd=-1
+    else: 
+        timeEndInd=np.argmin(np.abs(modelOutput['time'][:] - timeEnd))
+        
+    minVal = np.amin(modelOutput[varName][timeStartInd:timeEndInd])
+    maxVal = np.amax(modelOutput[varName][timeStartInd:timeEndInd])
+    
+    timeMinInd = (modelOutput[varName][:] == minVal)
+    timeMaxInd = (modelOutput[varName][:] == maxVal)
+    timeMin = modelOutput['time'][timeMinInd]
+    timeMax = modelOutput['time'][timeMaxInd]
+    
+    print('{} is at a minimum value of {} at time={} in the given time range'.format(varName, minVal, timeMin))
+    print('{} is at a maximum value of {} at time={} in the given time range'.format(varName, maxVal, timeMax))
+    
+    
+    
+def flowline(modelOutput, startX, startY, timeLevel=-1, modelTime=None, max_iter = 1e5):
+    if modelTime is not None:
+        timeLevel = modelTime_to_timeLevel(modelOutput, modelTime)
+    
     x1 = modelOutput['x1']*1000.
     y1 = modelOutput['y1']*1000.
     x0 = modelOutput['x0']*1000.
@@ -252,11 +296,22 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, max_iter = 1e5):
     
     return(flowlineX, flowlineY)
    
+def modelTime_to_timeLevel(modelOutput, modelTime):
+    timeBool = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time']))) # boolean array
+    timeLevel = [i for i, val in enumerate(timeBool) if val] # Get index of True in timeBool
+    timeLevel = timeLevel[0]
 
-def plot_groundingLine(modelOutput, ax, timeLevel=-1, color='black'):
+    return(timeLevel)
+    
+def plot_groundingLine(modelOutput, ax, timeLevel=-1, modelTime=None, color='black'):
+    if modelTime is not None:
+        timeLevel = modelTime_to_timeLevel(modelOutput, modelTime)
+    
     ax.contour(modelOutput["x1"], modelOutput["y1"], modelOutput["maskwater"][timeLevel,:,:], [0.5], colors=color)
     
-def plot_velocityVectors(modelOutput, modelVarsInfo, ax, varNames=['ua', 'va'], timeLevel=-1, horzStep=5, color='black'):
+def plot_velocityVectors(modelOutput, modelVarsInfo, ax, varNames=['ua', 'va'], timeLevel=-1, modelTime=None, horzStep=5, color='black'):
+    if modelTime is not None:
+        timeLevel = modelTime_to_timeLevel(modelOutput, modelTime)
     #First move both velocity vectors onto x1,y1
     uInterp = regrid_data(varNames[0], modelOutput, modelVarsInfo, destX='x1', destY='y1')
     vInterp = regrid_data(varNames[1], modelOutput, modelVarsInfo, destX='x1', destY='y1')
@@ -266,7 +321,10 @@ def plot_velocityVectors(modelOutput, modelVarsInfo, ax, varNames=['ua', 'va'], 
     ax.quiver(xGrid[1::horzStep, 1::horzStep], yGrid[1::horzStep, 1::horzStep], 
               uInterp[timeLevel,1::horzStep, 1::horzStep], vInterp[timeLevel,1::horzStep, 1::horzStep])               
   
-def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1, transectX=None, transectY=None, method='linear',color='black'):
+def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1, modelTime=None, transectX=None, transectY=None, method='linear',color='black'):
+    if modelTime is not None:
+        timeLevel = modelTime_to_timeLevel(modelOutput, modelTime)
+    
     x = modelOutput[modelVarsInfo[plotVarName]['dimensions'][2]]
     y = modelOutput[modelVarsInfo[plotVarName]['dimensions'][1]]
    
@@ -282,7 +340,17 @@ def plot_transect(modelOutput, modelVarsInfo, plotVarName, ax=None, timeLevel=-1
     
     return(plotVarInterp, distance)
  
-def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, interpMethod='linear'):
+def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, timeStart=None, timeEnd=None, interpMethod='linear'):
+   
+    if timeStart is not None:
+        timeStart = modelTime_to_timeLevel(modelOutput, timeStart)
+    else:
+        timeStart=0
+        
+    if timeEnd is not None:
+        timeEnd = modelTime_to_timeLevel(modelOutput, timeEnd)
+    else:
+        timeEnd=-1
     #get x and y dimensions of variable to be interpolated
     sourceX = modelVarsInfo[varName]['dimensions'][2]
     sourceY = modelVarsInfo[varName]['dimensions'][1]
@@ -293,7 +361,7 @@ def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, interp
         varInterpolator = interpolate.interp2d(modelOutput[sourceX], modelOutput[sourceY], modelOutput[varName][time,:,:], kind=interpMethod)
         varInterp[time] = varInterpolator(x, y)
         
-    ax.plot(modelOutput["time"], varInterp)
+    ax.plot(modelOutput["time"][timeStart:timeEnd], varInterp[timeStart:timeEnd])
     ax.set_ylabel(varName + ' (' + modelVarsInfo[varName]["units"] + ')')
     ax.set_xlabel("Time (yr)")
     
