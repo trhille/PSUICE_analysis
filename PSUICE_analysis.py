@@ -300,5 +300,20 @@ def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, interp
     return varInterp
     
     
+def add_dHdt(modelOutput, modelVarsInfo):
+    h = modelOutput["h"]
+    time = modelOutput["time"]
+    dHdt = np.zeros(np.shape(h))
+    for timeLev in np.arange(1, np.shape(h)[0]):
+        dHdt[timeLev,:,:] = (h[timeLev,:,:] - h[timeLev-1,:,:])/(time[timeLev] - time[timeLev-1])
     
+    modelOutput["dHdt"] = dHdt
+    modelVarsInfo['dHdt'] = {}
+    modelVarsInfo['dHdt']['longName'] = 'Average rate of thickness change since last output time'
+    modelVarsInfo['dHdt']['units'] = 'm/y'
+    modelVarsInfo['dHdt']['dimensions'] = ('time', 'y1', 'x1')
+    modelVarsInfo['dHdt']['shape'] = np.shape(dHdt)
+    
+    return modelOutput, modelVarsInfo
+
 ## TODO def movie()    
