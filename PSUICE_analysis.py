@@ -97,6 +97,28 @@ def regrid_velocity(modelOutput, modelVarsInfo):
         
     return modelOutput, modelVarsInfo
 
+def regrid_sedimentFlux(modelOutput, modelVarsInfo):
+    # Calculate sediment flux fields. This is complicated by the use of y1,x0 for u-component
+    # and y0,x1 for v-component. Use regrid_data to put these on the x1,y1 grid (same as thickness)
+    
+    #regrid velocity variables onto x1, y1
+    try:
+        sedsuInterp = regrid_data('sedsu', modelOutput, modelVarsInfo)
+        sedsvInterp = regrid_data('sedsv', modelOutput, modelVarsInfo)
+        
+        modelOutput['sedimentFlux'] = np.sqrt(sedsuInterp**2 + sedsvInterp**2)
+        
+        modelVarsInfo['sedimentFlux'] = {}
+        modelVarsInfo['sedimentFlux']['longName'] = 'Sub-ice sediment flux, interpolated onto x1,y1 grid'
+        modelVarsInfo['sedimentFlux']['units'] = 'm^2/y'
+        modelVarsInfo['sedimentFlux']['dimensions'] = ('time', 'y1', 'x1')
+        modelVarsInfo['sedimentFlux']['shape'] = np.shape(modelOutput['sedimentFlux'])
+    except:
+        print('sedsu and sedsv not found. Skipping regrid of sediment flux.')
+        
+        
+    return modelOutput, modelVarsInfo
+
 
 
 def regrid_data(varName, modelOutput, modelVarsInfo, destX='x1', destY='y1'):
@@ -157,7 +179,7 @@ def plot_timeseries(modelOutput, modelVarsInfo, varNames, ax=None, timeStart=Non
             axCount +=1
     
     
-def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
+def plot_maps(modelOutput, modelVarsInfo, varName, ax=None, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
    
     #get x and y dimensions of variable to be plotted
     x = modelOutput[modelVarsInfo[varName]['dimensions'][2]]
@@ -183,8 +205,8 @@ def plot_maps(modelOutput, modelVarsInfo, varName, timeLevel=-1, modelTime=None,
     if maskIce is True:
         var2plot[modelOutput['h'][timeLevel,:,:] < 1] = np.nan 
         
-        
-    fig, ax = plt.subplots(1,1, figsize=(10,10))
+    if ax is None:    
+        fig, ax = plt.subplots(1,1, figsize=(10,10))
     
     varMap = ax.pcolormesh(xGrid, yGrid, var2plot, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.axis('equal')
