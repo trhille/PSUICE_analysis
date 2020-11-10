@@ -39,13 +39,15 @@ def read_output(filename, fields='all', excludeFields=None):
     for field in fieldsList:
         modelOutput[field] = data.variables[field][:]
         
-        # Get information about variable        
-        modelVarsInfo[field] = {} #initialize dictionary
-        modelVarsInfo[field]['longName'] = data.variables[field].long_name
-        modelVarsInfo[field]['units'] = data.variables[field].units
-        modelVarsInfo[field]['dimensions'] = data.variables[field].dimensions
-        modelVarsInfo[field]['shape'] = data.variables[field].shape
-    
+        try:
+            # Get information about variable        
+            modelVarsInfo[field] = {} #initialize dictionary
+            modelVarsInfo[field]['longName'] = data.variables[field].long_name
+            modelVarsInfo[field]['units'] = data.variables[field].units
+            modelVarsInfo[field]['dimensions'] = data.variables[field].dimensions
+            modelVarsInfo[field]['shape'] = data.variables[field].shape
+        except:
+            print('No variable information found for {}'.format(field))
     data.close()
     
     return modelOutput, modelVarsInfo  
@@ -150,7 +152,7 @@ def get_variable_info(modelVarsInfo, varNames):
 
     
     
-def plot_timeseries(modelOutput, modelVarsInfo, varNames, ax=None, timeStart=None, timeEnd=None):
+def plot_timeseries(modelOutput, modelVarsInfo, varNames, ax=None, timeStart=None, timeEnd=None, lineColor='black', lineStyle='-'):
     if timeStart is not None:
         timeStart = modelTime_to_timeLevel(modelOutput, timeStart)
     else:
@@ -166,20 +168,23 @@ def plot_timeseries(modelOutput, modelVarsInfo, varNames, ax=None, timeStart=Non
         fig, ax = plt.subplots(nrows=len(varNames))
         
     if len(varNames) == 1:
-        ax.plot(modelOutput['time'][timeStart:timeEnd], modelOutput[varNames][timeStart:timeEnd])
+        ax.plot(modelOutput['time'][timeStart:timeEnd], modelOutput[varNames][timeStart:timeEnd],
+                color=lineColor, linestyle=lineStyle)
         ax.set_xlabel('Time (years)')
         ax.set_ylabel(varNames)
         
     if len(varNames) > 1:
         axCount=0
         for varName in varNames:
-            ax[axCount].plot(modelOutput['time'][timeStart:timeEnd], modelOutput[varName][timeStart:timeEnd])
+            ax[axCount].plot(modelOutput['time'][timeStart:timeEnd], 
+              modelOutput[varName][timeStart:timeEnd], color=lineColor, linestyle=lineStyle)
             ax[axCount].set_xlabel('Time (years)')
             ax[axCount].set_ylabel('{} ({})'.format(modelVarsInfo[varName]['longName'], modelVarsInfo[varName]['units']))
             axCount +=1
     
-    
-def plot_maps(modelOutput, modelVarsInfo, varName, ax=None, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
+
+
+def plot_maps(modelOutput, modelVarsInfo, varName=None, plotValue=None, ax=None, timeLevel=-1, modelTime=None, logScale=False, cmap='Blues', maskIce=False, vmin=None, vmax=None):
    
     #get x and y dimensions of variable to be plotted
     x = modelOutput[modelVarsInfo[varName]['dimensions'][2]]
@@ -193,14 +198,20 @@ def plot_maps(modelOutput, modelVarsInfo, varName, ax=None, timeLevel=-1, modelT
         #timeBool = (abs(modelTime-modelOutput['time']) == np.min(np.abs(modelTime-modelOutput['time']))) # boolean array
         #timeLevel = [i for i, val in enumerate(timeBool) if val] # Get index of True in timeBool
         #timeLevel = timeLevel[0]
- 
-    if logScale is False:
-        var2plot = modelOutput[varName][timeLevel,:,:]
+    if plotValue is None:
+        if logScale is False:
+            var2plot = modelOutput[varName][timeLevel,:,:]
+        else:
+            with warnings.catch_warnings():  #ignore divide-by-zero warning when taking log10
+                warnings.simplefilter("ignore")
+                var2plot = np.log10(modelOutput[varName][timeLevel,:,:])
     else:
-        with warnings.catch_warnings():  #ignore divide-by-zero warning when taking log10
-            warnings.simplefilter("ignore")
-            var2plot = np.log10(modelOutput[varName][timeLevel,:,:])
-    
+        if logScale is False:
+            var2plot = plotValue
+        else:
+            with warnings.catch_warnings():  #ignore divide-by-zero warning when taking log10
+                warnings.simplefilter("ignore")
+                var2plot = np.log10(plotValue)
     # Set variable to nan where there is no ice, if desired. Just for plotting clarity.
     if maskIce is True:
         var2plot[modelOutput['h'][timeLevel,:,:] < 1] = np.nan 
@@ -266,7 +277,8 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, modelTime=None, max_iter
     x0 = modelOutput['x0']*1000.
     y0 = modelOutput['y0']*1000.
     
-    
+    dx = x1[1] - x1[0]
+    dy = y1[1] - y1[0]
     # Interpolate velocities onto the same (x1, y1) grid
     vaInterpolator = interpolate.interp2d(x1, y0, 
                                           modelOutput['va'][timeLevel,:,:], kind='cubic')
@@ -297,7 +309,11 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, modelTime=None, max_iter
     print("Performing flowline calculation for time-level {}".format(timeLevel))
     while np.min(x1) <= flowlineX[flowlineIter] <= np.max(x1) \
     and np.min(y1) <= flowlineY[flowlineIter] <= np.max(y1) \
-    and flowlineIter <= max_iter-2 and hInterpolator(flowlineX[flowlineIter], flowlineY[flowlineIter]) >= 1.:
+    and flowlineIter <= max_iter-2 and hInterpolator(flowlineX[flowlineIter], flowlineY[flowlineIter]) >= 1. \
+    and hInterpolator(flowlineX[flowlineIter]+dx, flowlineY[flowlineIter]) >= 1. \
+    and hInterpolator(flowlineX[flowlineIter]-dx, flowlineY[flowlineIter]) >= 1. \
+    and hInterpolator(flowlineX[flowlineIter], flowlineY[flowlineIter]+dy) >= 1. \
+    and hInterpolator(flowlineX[flowlineIter]+dx, flowlineY[flowlineIter]-dy) >= 1.:
         flowlineIter += 1
         flowlineXOld = flowlineX[flowlineIter-1] * 1.
         flowlineYOld = flowlineY[flowlineIter-1] * 1.
@@ -308,7 +324,7 @@ def flowline(modelOutput, startX, startY, timeLevel=-1, modelTime=None, max_iter
                #flowlineXOld)**2 + (flowlineY[flowlineIter] - flowlineYOld)**2)
 
 
-    if flowlineIter >= max_iter:
+    if flowlineIter >= max_iter-1:
         print('Reached maximum number of iterations but did not reach end of flowline')
         
     print("time-level {} took {} iterations.".format(timeLevel, flowlineIter))
@@ -406,4 +422,14 @@ def add_dHdt(modelOutput, modelVarsInfo):
     
     return modelOutput, modelVarsInfo
 
+def define_catchments(modelOutput, modelVarsInfo, catchment='ice'):
+    if catchment is 'ice':
+        uVel = modelOutput["ua"][:]
+        vVel = modelOutput["va"][:]
+    elif catchment is 'sediment':
+        uVel = modelOutput["ubot"][:]
+        vVel = modelOutput["vbot"][:]
+        
+    #define catchment boundaries
+    
 ## TODO def movie()    
