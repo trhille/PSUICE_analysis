@@ -29,4 +29,6 @@ Seroussi, Hélène, Sophie Nowicki, Erika Simon, Ayako Abe-Ouchi, Torsten Albrec
 
 Sun, Sainan, Frank Pattyn, Erika G. Simon, Torsten Albrecht, Stephen Cornford, Reinhard Calov, Christophe Dumas et al. "Antarctic ice sheet response to sudden and sustained ice-shelf collapse (ABUMIP)." Journal of Glaciology (2020): 1-14. https://doi.org/10.5281/zenodo.3932934
 
+Hillebrand, T. R., Stone, J. O., Koutnik, M., King, C., Conway, H., Hall, B., Nichols, K., Goehring, B., and Gillespie, M. K.: Holocene thinning of Darwin and Hatherton glaciers, Antarctica, and implications for grounding-line retreat in the Ross Sea, The Cryosphere, 15, 3329–3354, (2021). Paper: https://doi.org/10.5194/tc-15-3329-2021; Model output: https://doi.org/10.5281/zenodo.4734615
+
 
