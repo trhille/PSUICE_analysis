@@ -6,6 +6,7 @@ Created on Fri Jul  3 16:14:48 2020
 @author: trevorhillebrand
 """
 import numpy as np
+import pandas as pd
 from netCDF4 import Dataset
 from matplotlib.pyplot import cm
 import matplotlib.pyplot as plt
@@ -405,5 +406,12 @@ def add_dHdt(modelOutput, modelVarsInfo):
     modelVarsInfo['dHdt']['shape'] = np.shape(dHdt)
     
     return modelOutput, modelVarsInfo
+
+def read_fort22(filePath):
+    dataFrame = pd.read_csv(filePath, header=1, comment='M', delim_whitespace=True)
+    # comment='M' removes rows that start with MARK, which interfere with making a nice 
+    # series out of each column in the fort.22 file. 
+
+    return dataFrame
 
 ## TODO def movie()    
