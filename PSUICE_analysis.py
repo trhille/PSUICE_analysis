@@ -208,6 +208,8 @@ def plot_maps(modelOutput, modelVarsInfo, varName, ax=None, timeLevel=-1, modelT
         
     if ax is None:    
         fig, ax = plt.subplots(1,1, figsize=(10,10))
+    else:
+        fig = ax.get_figure()
     
     varMap = ax.pcolormesh(xGrid, yGrid, var2plot, cmap=cmap, vmin=vmin, vmax=vmax)
     ax.axis('equal')
