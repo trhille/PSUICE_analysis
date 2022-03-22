@@ -385,10 +385,11 @@ def timeseriesAtPoint(modelOutput, modelVarsInfo, varName, x, y, ax=None, timeSt
     for time in range(0, len(modelOutput['time'])):
         varInterpolator = interpolate.interp2d(modelOutput[sourceX], modelOutput[sourceY], modelOutput[varName][time,:,:], kind=interpMethod)
         varInterp[time] = varInterpolator(x, y)
-        
-    ax.plot(modelOutput["time"][timeStart:timeEnd], varInterp[timeStart:timeEnd])
-    ax.set_ylabel(varName + ' (' + modelVarsInfo[varName]["units"] + ')')
-    ax.set_xlabel("Time (yr)")
+    
+    if ax is not None:    
+       ax.plot(modelOutput["time"][timeStart:timeEnd], varInterp[timeStart:timeEnd])
+       ax.set_ylabel(varName + ' (' + modelVarsInfo[varName]["units"] + ')')
+       ax.set_xlabel("Time (yr)")
     
     return varInterp
     
