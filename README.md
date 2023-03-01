@@ -31,4 +31,6 @@ Sun, Sainan, Frank Pattyn, Erika G. Simon, Torsten Albrecht, Stephen Cornford, R
 
 Hillebrand, T. R., Stone, J. O., Koutnik, M., King, C., Conway, H., Hall, B., Nichols, K., Goehring, B., and Gillespie, M. K.: Holocene thinning of Darwin and Hatherton glaciers, Antarctica, and implications for grounding-line retreat in the Ross Sea, The Cryosphere, 15, 3329–3354, (2021). Paper: https://doi.org/10.5194/tc-15-3329-2021; Model output: https://doi.org/10.5281/zenodo.4734615
 
+Li, D., DeConto, R.M. and Pollard, D., 2023. Climate model differences contribute deep uncertainty in future Antarctic ice loss. Science Advances, 9(7), p.eadd7082. Paper: https://www.science.org/doi/full/10.1126/sciadv.add7082 Model output: https://zenodo.org/record/7380180#.Y__AUuzMITu
+
 
